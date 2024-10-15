@@ -1,0 +1,41 @@
+{
+    "name": "opa-ai-assist-extension",
+    "displayName": "OPA & AI Assist Extension",
+    "description": "VS Code extension to assist with OPA validation, AI suggestions, and cloud storage template generation.",
+    "version": "1.2.0",
+    "publisher": "your-publisher-name",
+    "engines": {
+        "vscode": "^1.60.0"
+    },
+    "activationEvents": [
+        "onCommand:extension.aiAssist",
+        "onCommand:extension.validateOpa",
+        "onLanguage:rego"
+    ],
+    "main": "./src/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.aiAssist",
+                "title": "Run AI Assist"
+            },
+            {
+                "command": "extension.validateOpa",
+                "title": "Validate OPA Policy"
+            }
+        ],
+        "languages": [
+            {
+                "id": "rego",
+                "extensions": [".rego"],
+                "configuration": "./language-configuration.json"
+            }
+        ]
+    },
+    "scripts": {
+        "lint": "eslint ."
+    },
+    "devDependencies": {
+        "eslint": "^7.32.0"
+    }
+}
