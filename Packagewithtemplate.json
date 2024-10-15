@@ -19,12 +19,6 @@
             }
         ]
     },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./out/src/yourScript.js"
-    },
     "devDependencies": {
         "typescript": "^4.4.2",
         "vscode": "^1.56.0"
