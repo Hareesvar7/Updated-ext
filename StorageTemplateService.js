@@ -1,6 +1,7 @@
 // src/services/StorageTemplateService.js
 
 class StorageTemplateService {
+    // Method to retrieve storage service templates based on command input
     static getTemplate(command) {
         const templates = {
             aws_s3_template: `
@@ -179,12 +180,11 @@ deny[msg] {
 allow {
     not deny[_]
 }
-`,
+            `,
             azure_blob_storage_template: `
 package azure.blob.policies
 
 # Azure Blob Storage Policies
-# Add your Azure Blob Storage policies here
 # Example: Ensure all blobs have versioning enabled
 deny[msg] {
     resource := input.resource_changes[_]
@@ -199,7 +199,6 @@ deny[msg] {
 package gcp.storage.policies
 
 # GCP Storage Policies
-# Add your GCP Storage policies here
 # Example: Ensure all buckets have logging enabled
 deny[msg] {
     resource := input.resource_changes[_]
@@ -209,11 +208,13 @@ deny[msg] {
 }
 
 # Additional policies can be added here
-`,
+`
         };
 
+        // Return the template for the given command, or null if not found
         return templates[command] || null;
     }
 }
 
+// Export the StorageTemplateService class
 module.exports = StorageTemplateService;
