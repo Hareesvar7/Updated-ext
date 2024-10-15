@@ -2,31 +2,34 @@
 
 const vscode = require('vscode');
 
+// Define the storage templates for different cloud providers
 const templates = {
     aws_s3_template: `package aws.s3.policies
 
-# 1. Enforce S3 Access Points in VPC Only
+# S3 Bucket Policy
 deny[msg] {
     resource := input.resource_changes[_]
-    resource.type == "aws_s3_access_point"
-    not resource.change.after.vpc_configuration
-    msg = sprintf("S3 Access Point '%s' must be configured in a VPC", [resource.change.after.name])
+    resource.type == "aws_s3_bucket"
+    msg = sprintf("S3 bucket '%s' must have appropriate policies", [resource.change.after.bucket])
 }
+`,
+    azure_storage_template: `package azure.storage.policies
 
-# 2. Enforce Public Access Blocks on S3 Access Points
+# Azure Storage Account Policy
 deny[msg] {
     resource := input.resource_changes[_]
-    resource.type == "aws_s3_access_point"
-    not resource.change.after.public_access_block
-    msg = sprintf("S3 Access Point '%s' must have public access blocks enabled", [resource.change.after.name])
+    resource.type == "azurerm_storage_account"
+    msg = sprintf("Azure Storage Account '%s' must comply with security policies", [resource.change.after.name])
 }
+`,
+    gcp_storage_template: `package gcp.storage.policies
 
-# Add additional rules as needed...
-
-# Allow if no deny conditions are met
-allow {
-    not deny[_]
-}`
+# GCP Cloud Storage Policy
+deny[msg] {
+    resource := input.resource_changes[_]
+    resource.type == "google_storage_bucket"
+    msg = sprintf("GCP Cloud Storage Bucket '%s' must have secure settings", [resource.change.after.name])
+}
 };
 
 // Function to get the template based on the keyword
