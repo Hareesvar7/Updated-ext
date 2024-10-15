@@ -48,6 +48,4 @@ deny[msg] {
     }
 }
 
-// Exporting an instance of StorageTemplateService
-const storageTemplateService = new StorageTemplateService();
-module.exports = storageTemplateService.getTemplate.bind(storageTemplateService);
+module.exports = new StorageTemplateService();
