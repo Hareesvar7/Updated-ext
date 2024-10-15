@@ -1,21 +1,21 @@
 {
-    "name": "my-vscode-extension",
-    "displayName": "My VS Code Extension",
-    "description": "An extension to assist with cloud storage templates and OPA validation.",
+    "name": "policy-pilot",
+    "displayName": "Policy Pilot",
+    "description": "A .rego Policy Management Tool for cloud storage services.",
     "version": "0.0.1",
-    "publisher": "your-name",
+    "publisher": "YourName",
     "engines": {
-        "vscode": "^1.50.0"
+        "vscode": "^1.56.0"
     },
     "activationEvents": [
-        "onCommand:extension.generateStorageTemplate"
+        "onCommand:extension.insertTemplate"
     ],
-    "main": "./src/extension.js",
+    "main": "./extension.js",
     "contributes": {
         "commands": [
             {
-                "command": "extension.generateStorageTemplate",
-                "title": "Generate Storage Template"
+                "command": "extension.insertTemplate",
+                "title": "Insert Storage Template"
             }
         ]
     },
@@ -23,10 +23,10 @@
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
-        "postinstall": "node ./out/install.js"
+        "postinstall": "node ./out/src/yourScript.js"
     },
     "devDependencies": {
-        "typescript": "^4.0.0",
-        "vscode": "^1.1.37"
+        "typescript": "^4.4.2",
+        "vscode": "^1.56.0"
     }
 }
