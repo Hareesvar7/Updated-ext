@@ -1,35 +1,38 @@
-const vscode = require('vscode');
-
 const templates = {
     aws_s3_template: `package aws.s3.policies
 
 deny[msg] {
     resource := input.resource_changes[_]
     resource.type == "aws_s3_bucket"
-    msg = sprintf("S3 bucket '%s' must have appropriate policies", [resource.change.after.bucket])
+    not resource.change.after.server_side_encryption.enabled
+    msg = sprintf("S3 bucket '%s' must have server-side encryption enabled", [resource.change.after.bucket])
 }
 `,
+
     azure_storage_template: `package azure.storage.policies
 
 deny[msg] {
     resource := input.resource_changes[_]
     resource.type == "azurerm_storage_account"
-    msg = sprintf("Azure Storage Account '%s' must comply with security policies", [resource.change.after.name])
+    not resource.change.after.enable_https_traffic_only
+    msg = sprintf("Azure Storage Account '%s' must enforce HTTPS traffic only", [resource.change.after.name])
 }
 `,
+
     gcp_storage_template: `package gcp.storage.policies
 
 deny[msg] {
     resource := input.resource_changes[_]
     resource.type == "google_storage_bucket"
-    msg = sprintf("GCP Cloud Storage Bucket '%s' must have secure settings", [resource.change.after.name])
+    not resource.change.after.default_event_based_hold
+    msg = sprintf("GCP Storage Bucket '%s' must have event-based hold enabled", [resource.change.after.name])
 }
 };
 
+// Function to get the template based on keyword
 function getTemplate(keyword) {
     return templates[keyword] || null;
 }
 
-module.exports = {
-    getTemplate,
-};
+// Explicitly exporting the function
+module.exports = getTemplate;
