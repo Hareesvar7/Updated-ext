@@ -1,0 +1,44 @@
+{
+    "name": "policyPilot",
+    "displayName": "PolicyPilot: OPA, AI Assist, and Cloud Storage Templates",
+    "description": "An extension to help manage policies using OPA, AI Assist for recommendations, and cloud storage service template generation.",
+    "version": "1.0.0",
+    "engines": {
+        "vscode": "^1.63.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.aiAssist",
+        "onCommand:extension.validateOpa",
+        "onCommand:extension.showStorageTemplateGenerator"
+    ],
+    "main": "./src/Extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.aiAssist",
+                "title": "AI Assist: Get AI Recommendations"
+            },
+            {
+                "command": "extension.validateOpa",
+                "title": "OPA Validation: Validate OPA Policies"
+            },
+            {
+                "command": "extension.showStorageTemplateGenerator",
+                "title": "Storage Template Generator: Generate Cloud Storage Templates"
+            }
+        ]
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "test": "npm run test"
+    },
+    "dependencies": {
+        "vscode": "^1.1.37"
+    },
+    "devDependencies": {
+        "eslint": "^7.32.0"
+    }
+}
