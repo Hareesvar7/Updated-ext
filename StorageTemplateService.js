@@ -1,4 +1,12 @@
 class StorageTemplateService {
+    constructor() {
+        this.templates = {
+            aws_s3_template: this.getAwsS3Template(),
+            azure_storage_template: this.getAzureStorageTemplate(),
+            gcp_storage_template: this.getGcpStorageTemplate(),
+        };
+    }
+
     getAwsS3Template() {
         return `package aws.s3.policies
 
@@ -199,29 +207,8 @@ deny[msg] {
 deny[msg] {
     resource := input.resource_changes[_]
     resource.type == "azurerm_storage_account"
-    not resource.change.after.account_replication_type == "GRS"
-    msg = sprintf("Azure Storage Account '%s' must use Geo-Redundant Storage (GRS) for replication", [resource.change.after.name])
-}
-
-deny[msg] {
-    resource := input.resource_changes[_]
-    resource.type == "azurerm_storage_account"
-    not resource.change.after.immutable_storage_with_versioning.enabled
-    msg = sprintf("Azure Storage Account '%s' must have immutable blob storage with versioning enabled", [resource.change.after.name])
-}
-
-deny[msg] {
-    resource := input.resource_changes[_]
-    resource.type == "azurerm_storage_account"
-    not resource.change.after.encryption.key_source == "Microsoft.Keyvault"
-    msg = sprintf("Azure Storage Account '%s' must use customer-managed keys from Key Vault for encryption", [resource.change.after.name])
-}
-
-deny[msg] {
-    resource := input.resource_changes[_]
-    resource.type == "azurerm_storage_account"
-    count(resource.change.after.network_rules.default_action == "Deny") == 0
-    msg = sprintf("Azure Storage Account '%s' must have network access rules configured to deny by default", [resource.change.after.name])
+    not resource.change.after.geo_replication_enabled
+    msg = sprintf("Azure Storage Account '%s' must have geo-replication enabled", [resource.change.after.name])
 }
 `;
     }
@@ -293,4 +280,4 @@ deny[msg] {
 }
 `;
     }
-    
+
