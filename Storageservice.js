@@ -10,6 +10,4 @@ class StorageService {
     }
 }
 
-// Exporting an instance of StorageService
-const storageService = new StorageService();
-module.exports = storageService;
+module.exports = new StorageService();
