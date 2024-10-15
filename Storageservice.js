@@ -1,30 +1,29 @@
 const vscode = require('vscode');
 
 function showStorageTemplateGenerator(context) {
-    // Create a new webview panel
+    // Create and show a new webview
     const panel = vscode.window.createWebviewPanel(
-        'storageTemplateGenerator', // Identifies the type of the webview
-        'Storage Template Generator', // Title of the panel
-        vscode.ViewColumn.One, // Editor column to show the new webview panel in
+        'storageTemplateGenerator',
+        'Cloud Storage Template Generator',
+        vscode.ViewColumn.One,
         {
             enableScripts: true,
+            retainContextWhenHidden: true
         }
     );
 
+    // Set the webview's HTML content
     panel.webview.html = getWebviewContent();
 
     // Handle messages from the webview
     panel.webview.onDidReceiveMessage(
         message => {
             switch (message.command) {
-                case 'insertTemplate':
-                    const editor = vscode.window.activeTextEditor;
-                    if (editor) {
-                        editor.edit(editBuilder => {
-                            editBuilder.insert(editor.selection.active, message.template);
-                        });
-                    }
-                    break;
+                case 'generateTemplate':
+                    const selectedService = message.service;
+                    const template = generateTemplateForService(selectedService);
+                    panel.webview.postMessage({ command: 'showTemplate', template: template });
+                    return;
             }
         },
         undefined,
@@ -61,101 +60,112 @@ function getWebviewContent() {
                 select, button {
                     font-size: 16px;
                     padding: 10px;
-                    margin-top: 10px;
+                    border-radius: 8px;
+                    border: 1px solid #d1d5db;
                     width: 100%;
+                    margin-bottom: 20px;
                 }
                 button {
                     background-color: #4A90E2;
                     color: #fff;
-                    border: none;
-                    border-radius: 8px;
                     cursor: pointer;
-                    transition: background-color 0.3s ease;
                 }
                 button:hover {
                     background-color: #357ABD;
                 }
                 .response {
                     margin-top: 20px;
-                    padding: 10px;
+                    padding: 20px;
+                    border-radius: 8px;
+                    background-color: #ffffff;
                     border: 1px solid #d1d5db;
-                    border-radius: 5px;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                    white-space: pre-wrap;
+                    font-size: 16px;
+                    color: #333;
                 }
             </style>
         </head>
         <body>
             <h1>Storage Template Generator</h1>
-            <label for="cloudProvider">Choose Cloud Provider:</label>
+            <label for="cloudProvider">Select Cloud Provider:</label>
             <select id="cloudProvider">
-                <option value="">Select...</option>
                 <option value="aws">AWS</option>
-                <option value="gcp">GCP</option>
                 <option value="azure">Azure</option>
+                <option value="gcp">GCP</option>
             </select>
-            <label for="service">Choose Storage Service:</label>
-            <select id="service" disabled>
-                <option value="">Select a cloud provider first</option>
+            <label for="storageService">Select Storage Service:</label>
+            <select id="storageService">
+                <option value="s3">AWS S3</option>
+                <option value="azureStorage">Azure Storage</option>
+                <option value="gcpStorage">GCP Cloud Storage</option>
             </select>
-            <button id="generateTemplate" disabled>Generate Template</button>
-            <div class="response" id="response"></div>
+            <button id="generateTemplate">Generate Template</button>
+            <div class="response" id="templateResponse"></div>
+
             <script>
                 const vscode = acquireVsCodeApi();
 
-                const services = {
-                    aws: {
-                        "S3": "AWS S3",
-                    },
-                    gcp: {
-                        "Cloud Storage": "GCP Cloud Storage",
-                    },
-                    azure: {
-                        "Blob Storage": "Azure Blob Storage",
-                    },
-                };
+                document.getElementById('generateTemplate').addEventListener('click', () => {
+                    const cloudProvider = document.getElementById('cloudProvider').value;
+                    const storageService = document.getElementById('storageService').value;
+                    
+                    vscode.postMessage({
+                        command: 'generateTemplate',
+                        service: storageService
+                    });
+                });
 
-                document.getElementById('cloudProvider').addEventListener('change', function() {
-                    const provider = this.value;
-                    const serviceSelect = document.getElementById('service');
-                    serviceSelect.innerHTML = '<option value="">Select a service</option>';
-                    if (provider) {
-                        for (const service in services[provider]) {
-                            serviceSelect.innerHTML += `<option value="${service}">${services[provider][service]}</option>`;
-                        }
-                        serviceSelect.disabled = false;
-                    } else {
-                        serviceSelect.disabled = true;
+                // Listen for messages from the extension
+                window.addEventListener('message', event => {
+                    const message = event.data;
+                    const responseDiv = document.getElementById('templateResponse');
+
+                    if (message.command === 'showTemplate') {
+                        responseDiv.innerHTML = '<strong>Generated Template:</strong><br>' + message.template;
                     }
                 });
-
-                document.getElementById('service').addEventListener('change', function() {
-                    const generateButton = document.getElementById('generateTemplate');
-                    generateButton.disabled = !this.value;
-                });
-
-                document.getElementById('generateTemplate').addEventListener('click', () => {
-                    const provider = document.getElementById('cloudProvider').value;
-                    const service = document.getElementById('service').value;
-                    const template = generateTemplate(provider, service);
-                    vscode.postMessage({ command: 'insertTemplate', template });
-                });
-
-                function generateTemplate(provider, service) {
-                    const templates = {
-                        aws: {
-                            "S3": `package aws.s3.policies\n\n# Dummy template for AWS S3 Storage Service\n\n# Example S3 policy...`,
-                        },
-                        gcp: {
-                            "Cloud Storage": `package gcp.storage.policies\n\n# Dummy template for GCP Cloud Storage Service\n\n# Example GCP policy...`,
-                        },
-                        azure: {
-                            "Blob Storage": `package azure.blob.policies\n\n# Dummy template for Azure Blob Storage Service\n\n# Example Azure policy...`,
-                        },
-                    };
-                    return templates[provider][service] || '';
-                }
             </script>
         </body>
         </html>`;
+}
+
+// Dummy template generator function (you will update these templates)
+function generateTemplateForService(service) {
+    switch (service) {
+        case 's3':
+            return `# AWS S3 Template
+package aws.s3.policies
+
+deny[msg] {
+    resource := input.resource_changes[_]
+    resource.type == "aws_s3_bucket"
+    msg = "S3 bucket policy must be compliant"
+}`;
+
+        case 'azureStorage':
+            return `# Azure Storage Template
+package azure.storage.policies
+
+deny[msg] {
+    resource := input.resource_changes[_]
+    resource.type == "azure_storage_account"
+    msg = "Azure Storage policy must be compliant"
+}`;
+
+        case 'gcpStorage':
+            return `# GCP Cloud Storage Template
+package gcp.storage.policies
+
+deny[msg] {
+    resource := input.resource_changes[_]
+    resource.type == "gcp_storage_bucket"
+    msg = "GCP Cloud Storage policy must be compliant"
+}`;
+
+        default:
+            return "Invalid service selected";
+    }
 }
 
 module.exports = {
